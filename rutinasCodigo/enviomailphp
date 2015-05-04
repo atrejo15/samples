@@ -1,0 +1,39 @@
+PHP:
+
+// enviar mail con id del dibujo ingresado
+$envio_mail = new phpmailer();
+
+//// $envio_mail->PluginDir = "phpmailer/";
+//// $envio_mail->Mailer = "smtp";
+$envio_mail->Host = "mail.playful.com.ar";
+$envio_mail->Username = "mail.administracion@playful.com.ar";
+$envio_mail->Password = "M9Zyq9kDPk6F";
+$envio_mail->Port = "25";
+$envio_mail->From = "mail.administracion@playful.com.ar";
+$envio_mail->AddAddress($mail);
+$envio_mail->Subject = "Playful Jugueterías";
+//// $message = file_get_contents("http://glu01.glubits.com:81/playful/xml/mail.php?nro=1");http://playful.com.ar/
+//$message = "<html>
+                //<head>
+                    //<title>Playful</title>
+                //</head>
+                //<body>
+                    //<div style='background-image:url('img_mail_rc.jpg'); width:550px; height:440px;'>
+                        //<div style='width:300px; padding-top:357px; padding-left:26px; text-align:center; color:red; font-size:2.5em;'>
+                            //<span style='font-size:1em;'>{$ult_dibujo}</span>
+                        //</div>
+                    //</div>
+                //</body>
+            //</html>";
+$envio_mail->Body = $message;
+$envio_mail->isHtml(true);
+
+$envio_mail->Send();
+
+//envío el mensaje, comprobando si se envió correctamente
+if(!$mail­->Send()) {
+    echo 'false';
+}
+else {
+    echo 'true';
+}

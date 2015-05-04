@@ -1,0 +1,76 @@
+JS:
+
+$("#tablegrid").sortable({
+    placeholder: "ui-state-highlight",
+    opacity: 0.6,
+    cursor: 'move',
+    update: function(event, ui) {
+        var order = $(this).sortable("toArray").toString();
+        var params = "orden=" + order;
+        // orden=1_ADM,2_ADM
+        $.ajax({
+        type: "POST",
+        url: "ordenarlista.php",
+        data: params,
+        dataType: "json",
+        error: callback_error,
+        success: function(){
+            console.log("Registros ordenados correctamente");
+            }
+        });
+    }
+});
+
+function callback_error(jqXHR, textStatus, errorThrown) {
+    console.log("No se pudieron ordenar los registros" + jqXHR);
+}
+
+-----
+HTML:
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Titulo</th>
+        </tr>
+    </thead>
+    <tbody id="tablegrid">
+		<tr id="{{id}}_CEN" data-active="{{active}}">
+            <td>{{titulo}}</td>
+		</tr>
+    </tbody>
+</table>
+
+------
+CÓDIGO:
+
+<?php
+
+//orden=1_ADM,2_ADM
+require_once '../api/class/centrosatencion.php';
+require_once '../api/dao.php';
+
+$orden = $_POST['orden'];
+
+$array_orden = explode(",", $orden);
+$cont = 1;
+foreach ($array_orden as $item_orden) {
+    //item_orden: 1_ADM
+    $partes_item = explode("_", $item_orden);
+    $id = $partes_item[0];
+    $tipo_usuario = $partes_item[1];
+
+    $wherestr = "update centrosatencion set orden = '$cont' "
+        . " where id = '$id'";
+    
+    $centro = Centrosatencion::find($id);
+    if ($centro) {
+        $centro->orden = $cont;
+        $centro->save();
+    }
+
+    $cont++;
+}
+
+$res = json_encode("ok", true);
+echo $res;

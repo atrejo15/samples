@@ -1,0 +1,79 @@
+JS:
+
+$(document).ready(function(){
+    //buscador de localidades
+    $("#search_results").slideUp();
+    //botón de busqueda
+    // $("#button_find").click(function(event){
+    //     event.preventDefault();
+    //     search_ajax_way();
+    // });
+    $("#localidad").keyup(function(event){
+        event.preventDefault();
+        var search_this = $("#localidad").val().trim();
+
+		//buscar cdo se hayan ingresado como mínimo 3 letras
+        if (search_this.length >= 3) {
+            search_ajax_way();
+        }
+        else if(search_this.length == 0) {
+            $("div#display_results").empty();
+        };
+    });
+
+	//mostrar resultado seleccionado en input
+    $(document).on("click", ".loc", function(){
+        var idlocalidad = $(this).attr("id");
+        conlog($(this).text());
+
+        $("input#localidad_id").val(idlocalidad);
+        $("input#localidad").val($(this).text());
+
+        $("div#display_results").empty();
+    });
+});
+
+//POST al archivo php
+function search_ajax_way(){
+    $("#search_results").show();
+    var search_this = $("#localidad").val();
+
+    $.post(
+        "buscar_localidad.php", 
+        {localidadbuscar : search_this}, 
+        function(data){
+            $("div#display_results").html(data);
+        }
+    )
+}
+
+-----
+HTML:
+
+<input type="text" class="form-control" id="localidad" name="localidad" value="">
+<div id="display_results"></div>
+
+----
+PHP:
+
+<?php
+//parametros
+$localidadbuscar = (isset($_POST['localidadbuscar']))?$_POST['localidadbuscar']:'';
+
+$localidades = Localidades::wherestr("nombre LIKE '%$localidadbuscar%'");
+
+foreach ($localidades as &$loc) {
+	$provincias = Provincias::wherestr("id = '$loc->provincia_id'");
+
+	$loc->provincia = $provincias[0]->nombre;
+}
+
+$stringres = "";
+//armar elementos html de respuesta (lista de resultados a mostrar)
+foreach ($localidades as $loc) {
+	$stringres .= "<a id='$loc->id' class='loc'>$loc->nombre - $loc->provincia</a>";
+	$stringres .= "<br/>\n";
+    $stringres .= "<input type='hidden' name='localidad_id' value='$loc->id'>";
+}
+
+echo $stringres;
